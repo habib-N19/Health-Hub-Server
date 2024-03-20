@@ -9,7 +9,13 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors(
+    {
+        origin: 'http://localhost:5173',
+        credentials: true
+
+    }
+));
 app.use(express.json());
 
 // MongoDB Connection URL
@@ -21,13 +27,13 @@ async function run() {
         // Connect to MongoDB
         await client.connect();
         console.log("Connected to MongoDB");
-
-        const db = client.db('assignment');
+        const db = client.db('assignment-6');
         const collection = db.collection('users');
 
         // User Registration
         app.post('/api/v1/register', async (req, res) => {
             const { name, email, password } = req.body;
+            console.log(req.body);
 
             // Check if email already exists
             const existingUser = await collection.findOne({ email });
@@ -53,6 +59,7 @@ async function run() {
         // User Login
         app.post('/api/v1/login', async (req, res) => {
             const { email, password } = req.body;
+            console.log(req.body);
 
             // Find user by email
             const user = await collection.findOne({ email });
@@ -80,6 +87,23 @@ async function run() {
         // ==============================================================
         // WRITE YOUR CODE HERE
         // ==============================================================
+
+        // supply posts
+        app.get('/api/v1/supplies', async (req, res) => {
+            const supplies = await db.collection('supplies').find().toArray();
+            res.json(supplies);
+        });
+
+        // get top 6 supplies
+        app.get('/api/v1/top-supplies', async (req, res) => {
+            const supplies = await db.collection('supplies')
+                .find()
+                .sort({ amount: -1 }) // Sort by amount in descending order
+                .limit(6) // Limit the result to 6 documents
+                .toArray();
+
+            res.json(supplies);
+        });
 
 
         // Start the server
