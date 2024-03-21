@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
@@ -14,6 +14,10 @@ app.use(cors(
         origin: 'http://localhost:5173',
         credentials: true
 
+    },
+    {
+        origin: 'https://healthhub-991c2.web.app/',
+        credentials: true
     }
 ));
 app.use(express.json());
@@ -104,6 +108,47 @@ async function run() {
 
             res.json(supplies);
         });
+        // update supply by id
+        app.put('/api/v1/update-supply/:id', async (req, res) => {
+            const { id } = req.params;
+            const { title, category, amount } = req.body;
+
+            try {
+                const result = await db.collection('supplies').updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: { title, category, amount } } // Update the fields you want to change
+                );
+
+                res.json(result);
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({ message: 'Internal server error' });
+            }
+        });
+
+
+
+
+        // delete supply by _id
+        app.delete('/api/v1/supplies/:id', async (req, res) => {
+            const { id } = req.params;
+            const result = await db.collection('supplies').deleteOne({ _id: new ObjectId(id) });
+            res.json(result);
+        });
+        // create new supply
+        app.post('/api/v1/supplies', async (req, res) => {
+            const supply = req.body;
+            const result = await db.collection('supplies').insertOne(supply);
+            res.json(result);
+
+        });
+        // get top donor testimonial data
+        app.get('/api/v1/top-provider-testimonials', async (req, res) => {
+            const topProviderTestimonials = await db.collection('topProviders').find().toArray();
+            res.json(topProviderTestimonials);
+        }
+        );
+        // dashboard supply data
 
 
         // Start the server
