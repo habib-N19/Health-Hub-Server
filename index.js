@@ -10,14 +10,16 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors(
-    {
-        origin: 'http://localhost:5173',
-        credentials: true
+    // {
+    //     origin: 'http://localhost:5173',
+    //     credentials: true,
+    //     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
 
-    },
+    // },
     {
-        origin: 'https://healthhub-991c2.web.app/',
-        credentials: true
+        origin: 'https://healthhub-991c2.web.app',
+        credentials: true,
+        methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     }
 ));
 app.use(express.json());
