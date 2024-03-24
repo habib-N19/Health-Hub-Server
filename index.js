@@ -10,17 +10,17 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors(
-    {
-        origin: 'http://localhost:5173',
-        credentials: true,
-        methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-
-    },
     // {
-    //     origin: 'https://healthhub-991c2.web.app',
+    //     origin: 'http://localhost:5173',
     //     credentials: true,
     //     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-    // }
+
+    // },
+    {
+        origin: 'https://health-hub-portal.web.app',
+        credentials: true,
+        methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    }
 ));
 app.use(express.json());
 
@@ -150,8 +150,57 @@ async function run() {
             res.json(topProviderTestimonials);
         }
         );
-        // dashboard supply data
+        //create testimonial
+        app.post('/api/v1/testimonials', async (req, res) => {
+            const testimonial = req.body;
+            const result = await db.collection('testimonials').insertOne(testimonial);
+            res.json(result);
+        });
+        // get all donors data
+        app.get('/api/v1/donors', async (req, res) => {
+            const donors = await db.collection('donors').find().toArray();
+            res.json(donors);
+        });
+        // get all volunteering posts
+        app.get('/api/v1/volunteering-posts', async (req, res) => {
+            const volunteeringPosts = await db.collection('volunteeringPosts').find().toArray();
+            res.json(volunteeringPosts);
+        });
+        // get all volunteers
+        app.get('/api/v1/volunteers', async (req, res) => {
+            const volunteers = await db.collection('volunteers').find().toArray();
+            res.json(volunteers);
+        });
+        // add new volunteers
+        app.post('/api/v1/volunteers', async (req, res) => {
+            const volunteer = req.body;
+            const result = await db.collection('volunteers').insertOne(volunteer);
+            res.json(result);
+        });
 
+        // get all community posts
+        app.get('/api/v1/posts', async (req, res) => {
+            const communityPosts = await db.collection('communityPosts').find().toArray();
+            res.json(communityPosts);
+        });
+        // add a post 
+        app.post('/api/v1/posts', async (req, res) => {
+            const post = req.body;
+            const result = await db.collection('communityPosts').insertOne(post);
+            res.json(result);
+        });
+        // add comment to a post 
+        app.post('/api/v1/posts/:id/comments', async (req, res) => {
+            const { id } = req.params;
+            const comment = req.body;
+
+            const result = await db.collection('communityPosts').updateOne(
+                { _id: new ObjectId(id) },
+                { $push: { comments: comment } }
+            );
+
+            res.json(result);
+        });
 
         // Start the server
         app.listen(port, () => {
